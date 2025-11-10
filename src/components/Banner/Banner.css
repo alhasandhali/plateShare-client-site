@@ -1,0 +1,6 @@
+.hero {
+  position: relative;
+  background: linear-gradient(rgba(93, 174, 97, 0.8), rgba(59, 125, 94, 0.8)),
+    url("https://i.ibb.co.com/YFvBbK7y/food-banner-set-dishes-table-traditional-cuisines-world-top-view-187166-48295.jpg")
+      center/cover no-repeat;
+}
