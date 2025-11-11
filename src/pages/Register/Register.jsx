@@ -1,45 +1,114 @@
-import React, { use, useState } from "react";
-import { Link } from "react-router";
+import React, { use, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
 import { GoogleAuthProvider } from "firebase/auth";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import axios from "axios";
+import { toast } from "react-toastify";
+import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
 
 const googleProvider = new GoogleAuthProvider();
 
 const Register = () => {
   usePageTitle("Registration");
+  const { signInWithGoogle, signUpWithEmailPass, updateUser, setUser } =
+    use(AuthContext);
 
-  const { signInWithGoogle } = use(AuthContext);
+  const [passwordError, setPasswordError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePassword = () => setShowPassword(!showPassword);
+  const navigate = useNavigate();
 
-  const handleGoogleSignUp = () => {
-    signInWithGoogle(googleProvider)
-      .then(async (result) => {
-        const user = result.user;
+  const rex = /^(?=.*[A-Z])(?=.*[a-z]).{6,}$/;
 
-        const userData = {
-          name: user.displayName,
-          email: user.email,
-          image: user.photoURL,
-        };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+  } = useForm();
 
-        try {
-          const res = await axios.post("http://localhost:3000/user", userData);
-          console.log("User saved to DB:", res.data);
-          console.log("Sign up successful!");
-        } catch (err) {
-          console.error("Error saving user:", err);
-          console.log("Failed to save user to database.");
-        }
-      })
-      .catch((error) => {
-        console.error("Google sign-in error:", error.code, error.message);
+  const password = watch("password");
+
+  useEffect(() => {
+    if (password && !rex.test(password)) {
+      setPasswordError(
+        "Password must contain at least 1 uppercase letter, 1 lowercase letter and be 6+ characters long."
+      );
+    } else {
+      setPasswordError("");
+    }
+  }, []);
+
+  const saveUserMutation = useMutation({
+    mutationFn: async (userData) => {
+      const { data } = await axios.post("http://localhost:3000/user", userData);
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      setUser({
+        displayName: variables.name,
+        email: variables.email,
+        photoURL: variables.image,
       });
+      toast.success("Registration successful!");
+      navigate("/");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to register user");
+    },
+  });
+
+  const onSubmit = async (data) => {
+    try {
+      const result = await signUpWithEmailPass(data.email, data.password);
+      const user = result.user;
+
+      await updateUser(user, data.name, data.image);
+
+      const userData = {
+        name: data.name,
+        email: user.email,
+        image:
+          data.image || "https://i.ibb.co.com/pvWPkg07/man-illustration.webp",
+      };
+
+      saveUserMutation.mutate(userData);
+      reset();
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
-  const [showPassword, setShowPassword] = useState(false);
+  const handleGoogleSignUp = async () => {
+    try {
+      const result = await signInWithGoogle(googleProvider);
+      const user = result.user;
 
-  const togglePassword = () => setShowPassword(!showPassword);
+      const userData = {
+        name: user.displayName,
+        email: user.email,
+        image: user.photoURL,
+      };
+
+      saveUserMutation.mutate(userData);
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
+  };
+
   return (
     <div className="bg-linear-to-br from-[#5dae61] via-[#3b7d5e] to-[#183153] py-10">
       <div className="flex items-center justify-center w-11/12 m-auto">
@@ -50,26 +119,44 @@ const Register = () => {
           <p className="text-gray-600 mb-8">
             Join our food-sharing community today!
           </p>
-          <form className="space-y-5 text-left">
+          {/* Form */}
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-5 text-left"
+          >
             <div>
               <label className="block text-gray-700 font-semibold mb-1">
                 Full Name
               </label>
               <input
+                {...register("name", { required: "Name is required" })}
                 type="text"
                 placeholder="Enter your name"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
               />
+              {errors.name && (
+                <p className="text-red-400 text-sm">{errors.name.message}</p>
+              )}
             </div>
             <div>
               <label className="block text-gray-700 font-semibold mb-1">
                 Email
               </label>
               <input
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^\S+@\S+$/i,
+                    message: "Invalid email address",
+                  },
+                })}
                 type="email"
                 placeholder="Enter your email"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
               />
+              {errors.email && (
+                <p className="text-red-400 text-sm">{errors.email.message}</p>
+              )}
             </div>
             <div>
               <label className="block text-gray-700 font-semibold mb-1">
@@ -77,19 +164,25 @@ const Register = () => {
               </label>
               <div className="mt-1 relative">
                 <input
-                  id="password"
-                  name="password"
+                  {...register("password", {
+                    required: "Password is required",
+                    validate: (value) =>
+                      rex.test(value) ||
+                      "Must contain uppercase, lowercase, and be 6+ characters",
+                  })}
                   type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
                   placeholder="••••••••"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
                 />
+                {errors.password && (
+                  <p className="text-red-400 text-sm">
+                    {errors.password.message}
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={togglePassword}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute inset-y-0 right-2 flex items-center px-2 text-sm text-gray-500 cursor-pointer"
+                  className="absolute inset-y-0 right-2 flex items-center px-2 text-sm text-gray-500 cursor-pointer z-10"
                 >
                   {showPassword ? (
                     <svg
@@ -131,18 +224,31 @@ const Register = () => {
                 </button>
               </div>
             </div>
+            {passwordError && (
+              <p className="text-red-400 text-sm">{passwordError}</p>
+            )}
             <div>
               <label className="block text-gray-700 font-semibold mb-1">
-                URL_Image
+                Image URL
               </label>
               <input
+                {...register("image", { required: "Image URL is required" })}
                 type="text"
                 placeholder="Enter your image URL"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
               />
+              {errors.image && (
+                <p className="text-red-400 text-sm">{errors.image.message}</p>
+              )}
             </div>
-            <button type="submit" className="themeBtn w-full">
-              <span>Register</span>
+            <button
+              type="submit"
+              className="themeBtn w-full"
+              disabled={saveUserMutation.isPending}
+            >
+              <span>
+                {saveUserMutation.isPending ? "Registering..." : "Register"}
+              </span>
             </button>
           </form>
           <div className="relative my-8">
@@ -182,7 +288,7 @@ const Register = () => {
                 ></path>
               </g>
             </svg>
-            Sign Up With Google
+            Login with Google
           </button>
           <p className="mt-6 text-gray-600">
             Already have an account?{" "}

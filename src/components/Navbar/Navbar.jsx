@@ -197,9 +197,6 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="hidden lg:flex gap-3">
-              <NavLink to="/register" className="themeBtn w-fit">
-                <span className="w-auto">Registration</span>
-              </NavLink>
               <NavLink to="/login" className="themeBtn w-fit">
                 <span className="w-auto">Login</span>
               </NavLink>
