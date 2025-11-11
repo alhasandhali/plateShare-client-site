@@ -1,6 +1,9 @@
 import React from "react";
+import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
 
 const CreateNewFood = () => {
+  usePageTitle("New Food");
+
   return (
     <div>
       <div className="min-h-screen bg-linear-to-b from-white to-[#f1f5f2] flex justify-center items-center py-10 px-4 sm:px-6 lg:px-8">

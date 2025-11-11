@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import FoodCard from "../../components/FoodCard/FoodCard";
+import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
 
 const AvaiableAllFoods = () => {
+  usePageTitle("All Foods");
+
   const [foods, setFoods] = useState([]);
 
   useEffect(() => {

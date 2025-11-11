@@ -41,13 +41,14 @@ const AuthProvider = ({ children }) => {
     return deleteUser(u);
   };
 
+  // Update user
   const updateUser = (u, userName, img) => {
     return updateProfile(u, {
       displayName: userName,
       photoURL: img,
     });
   };
-
+  //  Chnage password
   const changePassword = (u, newPassword) => {
     return updatePassword(u, newPassword);
   };

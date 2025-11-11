@@ -1,7 +1,42 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import { Link } from "react-router";
+import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
+import { GoogleAuthProvider } from "firebase/auth";
+import { AuthContext } from "../../context/AuthContext/AuthContext";
+import axios from "axios";
+
+const googleProvider = new GoogleAuthProvider();
 
 const Register = () => {
+  usePageTitle("Registration");
+
+  const { signInWithGoogle } = use(AuthContext);
+
+  const handleGoogleSignUp = () => {
+    signInWithGoogle(googleProvider)
+      .then(async (result) => {
+        const user = result.user;
+
+        const userData = {
+          name: user.displayName,
+          email: user.email,
+          image: user.photoURL,
+        };
+
+        try {
+          const res = await axios.post("http://localhost:3000/user", userData);
+          console.log("User saved to DB:", res.data);
+          console.log("Sign up successful!");
+        } catch (err) {
+          console.error("Error saving user:", err);
+          console.log("Failed to save user to database.");
+        }
+      })
+      .catch((error) => {
+        console.error("Google sign-in error:", error.code, error.message);
+      });
+  };
+
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePassword = () => setShowPassword(!showPassword);
@@ -116,7 +151,10 @@ const Register = () => {
               OR
             </span>
           </div>
-          <button className="btn bg-white text-black border-[#e5e5e5] w-full flex items-center justify-center gap-2">
+          <button
+            onClick={() => handleGoogleSignUp()}
+            className="btn bg-white text-black border-[#e5e5e5] w-full flex items-center justify-center gap-2"
+          >
             <svg
               aria-label="Google logo"
               width="16"

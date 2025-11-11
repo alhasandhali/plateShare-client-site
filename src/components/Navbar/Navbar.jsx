@@ -1,12 +1,24 @@
-import React from "react";
+import React, { use } from "react";
 import logo from "../../assets/logo.png";
 import { Link, NavLink } from "react-router";
 import "./Navbar.css";
+import { AuthContext } from "../../context/AuthContext/AuthContext";
 
 const Navbar = () => {
+  const { user, logOut } = use(AuthContext);
+  console.log(user);
+
+  user ? console.log("User ache") : console.log("User nai");
+
+  const handleLogout = () => {
+    logOut()
+      .then(() => console.log("User logged out"))
+      .catch((err) => console.error("Logout error:", err));
+  };
+
   const navLinkStyle =
     "montserrat text-sm md:text-[16px] text-prime rounded-none";
-  const navBtn = "ps-btn px-3.5 py-2.5 rounded-sm montserrat text-center";
+
   return (
     <div className="bg-base-100 shadow-sm">
       <div className="navbar md:w-11/12 m-auto">
@@ -35,11 +47,6 @@ const Navbar = () => {
                 Available Foods
               </NavLink>
             </li>
-            <li>
-              <NavLink to="/create-food" className={navLinkStyle}>
-                Create New Food
-              </NavLink>
-            </li>
           </ul>
         </div>
         <div className="navbar-end">
@@ -64,19 +71,54 @@ const Navbar = () => {
               tabIndex="-1"
               className="menu menu-sm dropdown-content bg-base-200 rounded-box z-100 right-0 mt-3 w-52 p-2 shadow"
             >
+              {user && (
+                <li>
+                  <div className="flex flex-col">
+                    {user.photoURL && (
+                      <div className="cursor-pointer flex items-center gap-2">
+                        <img
+                          src={user.photoURL}
+                          alt={user.displayName}
+                          tabIndex={0}
+                          role="button"
+                          className="w-10 h-10 rounded-full border-2 border-[#5dae61]"
+                        />
+                        <p className={`${navLinkStyle} font-bold`}>
+                          {user.displayName}
+                        </p>
+                      </div>
+                    )}
+                    <ul className="p-2">
+                      <li>
+                        <NavLink to="/dashboard" className={navLinkStyle}>
+                          Dashboard
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink to="/create-food" className={navLinkStyle}>
+                          Add Food
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink to="/manage-my-foods" className={navLinkStyle}>
+                          Manage My Foods
+                        </NavLink>
+                      </li>
+                      <li>
+                        <NavLink
+                          to="/my-food-requests"
+                          className={navLinkStyle}
+                        >
+                          My Food Requests
+                        </NavLink>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              )}
               <li>
                 <NavLink to="/" className={navLinkStyle}>
                   Home
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/available-foods" className={navLinkStyle}>
-                  How It Works
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/available-foods" className={navLinkStyle}>
-                  Our Mission
                 </NavLink>
               </li>
               <li>
@@ -85,30 +127,84 @@ const Navbar = () => {
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/create-food" className={navLinkStyle}>
-                  Create New Food
-                </NavLink>
-              </li>
-              <li>
-                <div className="flex flex-col-reverse">
-                  <Link to="/register" className={`${navBtn} w-full`}>
-                    Registration
-                  </Link>
-                  <Link to="/login" className={`${navBtn} w-full`}>
-                    Login
-                  </Link>
-                </div>
+                {user ? (
+                  <button
+                    onClick={handleLogout}
+                    className="btn montserrat text-sm text-white bg-gradian mt-3"
+                  >
+                    <span>Logout</span>
+                  </button>
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    <NavLink
+                      to="/register"
+                      className="btn montserrat text-sm text-white bg-gradian mt-3"
+                    >
+                      Registration
+                    </NavLink>
+                    <NavLink
+                      to="/login"
+                      className="btn montserrat text-sm text-white bg-gradian mt-3"
+                    >
+                      Login
+                    </NavLink>
+                  </div>
+                )}
               </li>
             </ul>
           </div>
-          <div className="hidden lg:flex gap-3">
-            <NavLink to="/register" className="themeBtn w-fit">
-              <span className="w-auto">Registration</span>
-            </NavLink>
-            <NavLink to="/login" className="themeBtn w-fit">
-              <span className="w-auto">Login</span>
-            </NavLink>
-          </div>
+          {user ? (
+            <div className="hidden lg:flex justify-between items-center gap-3 dropdown dropdown-bottom dropdown-end">
+              {user.photoURL && (
+                <img
+                  src={user.photoURL}
+                  alt={user.displayName}
+                  tabIndex={0}
+                  role="button"
+                  className="w-10 h-10 rounded-full border-2 border-[#5dae61] cursor-pointer"
+                />
+              )}
+              <ul
+                tabIndex="-1"
+                className="dropdown-content menu bg-base-100 rounded-box z-100 w-52 p-2 shadow-sm"
+              >
+                <li>
+                  <NavLink to="/dashboard" className={navLinkStyle}>
+                    Dashboard
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/create-food" className={navLinkStyle}>
+                    Add Food
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/manage-my-foods" className={navLinkStyle}>
+                    Manage My Foods
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/my-food-requests" className={navLinkStyle}>
+                    My Food Requests
+                  </NavLink>
+                </li>
+                <li>
+                  <button onClick={handleLogout} className="themeBtn mt-3">
+                    <span>Logout</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          ) : (
+            <div className="hidden lg:flex gap-3">
+              <NavLink to="/register" className="themeBtn w-fit">
+                <span className="w-auto">Registration</span>
+              </NavLink>
+              <NavLink to="/login" className="themeBtn w-fit">
+                <span className="w-auto">Login</span>
+              </NavLink>
+            </div>
+          )}
         </div>
       </div>
     </div>

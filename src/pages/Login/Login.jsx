@@ -1,10 +1,69 @@
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import { Link } from "react-router";
+import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
+import { GoogleAuthProvider } from "firebase/auth";
+import { AuthContext } from "../../context/AuthContext/AuthContext";
+import axios from "axios";
+
+const googleProvider = new GoogleAuthProvider();
 
 const Login = () => {
+  usePageTitle("Login");
+
+  const { signInWithGoogle } = use(AuthContext);
+
+  const handleGoogleLogin = () => {
+    signInWithGoogle(googleProvider)
+      .then(async (result) => {
+        const user = result.user;
+
+        const userData = {
+          name: user.displayName,
+          email: user.email,
+          image: user.photoURL,
+        };
+
+        try {
+          const existingUser = await axios.get(
+            `http://localhost:3000/user/${user.email}`
+          );
+
+          if (existingUser.data) {
+            console.log("User already exists:", existingUser.data);
+          } else {
+            const res = await axios.post(
+              "http://localhost:3000/user",
+              userData
+            );
+            console.log("New user added:", res.data);
+          }
+
+          alert("Login successful!");
+        } catch (err) {
+          if (err.response && err.response.status === 404) {
+            try {
+              const res = await axios.post(
+                "http://localhost:3000/user",
+                userData
+              );
+              console.log("New user added:", res.data);
+            } catch (postErr) {
+              console.error("Error saving new user:", postErr);
+            }
+          } else {
+            console.error("Login error:", err);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Google sign-in error:", error.code, error.message);
+      });
+  };
+
   const [showPassword, setShowPassword] = useState(false);
 
   const togglePassword = () => setShowPassword(!showPassword);
+
   return (
     <div className="py-10 bg-linear-to-br from-[#5dae61] via-[#3b7d5e] to-[#183153]">
       <div className="flex items-center justify-center w-11/12 m-auto">
@@ -95,7 +154,10 @@ const Login = () => {
               OR
             </span>
           </div>
-          <button className="btn bg-white text-black border-[#e5e5e5] w-full flex items-center justify-center gap-2">
+          <button
+            onClick={() => handleGoogleLogin()}
+            className="btn bg-white text-black border-[#e5e5e5] w-full flex items-center justify-center gap-2"
+          >
             <svg
               aria-label="Google logo"
               width="16"

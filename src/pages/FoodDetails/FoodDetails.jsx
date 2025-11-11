@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
+import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
 
 const FoodDetails = () => {
   const { id } = useParams();
@@ -42,6 +43,8 @@ const FoodDetails = () => {
   } = food;
 
   const { name, email, image } = donator;
+
+  usePageTitle(food_name);
 
   return (
     <div className="w-11/12 max-w-7xl mx-auto py-10 sm:py-16">
@@ -85,9 +88,14 @@ const FoodDetails = () => {
                 {food_status}
               </span>
 
-              <Link to="/" className="themeBtn w-fit">
+              <button
+                onClick={() =>
+                  document.getElementById("foodRequestModal").showModal()
+                }
+                className="themeBtn w-fit cursor-pointer"
+              >
                 <span className="w-auto">Request Food</span>
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -178,6 +186,78 @@ const FoodDetails = () => {
           </table>
         </div>
       </div>
+      {/* Open the modal using document.getElementById('ID').showModal() method */}
+      <dialog
+        id="foodRequestModal"
+        className="modal fixed inset-0 z-50 flex justify-center items-center bg-black/50 p-4"
+      >
+        <div className="modal-box p-6 sm:p-8 relative">
+          <button
+            onClick={() => document.getElementById("foodRequestModal").close()}
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 font-bold text-2xl cursor-pointer"
+          >
+            &times;
+          </button>
+
+          <h2 className="text-2xl font-bold text-[#3b7d5e] mb-4 text-center">
+            Request {food_name}
+          </h2>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+
+              const requestData = {
+                food_id: id,
+                user_name: e.target.user_name.value,
+                user_email: e.target.user_email.value,
+                user_image: e.target.user_image.value,
+                location: e.target.location.value,
+                why_need_food: e.target.why_need_food.value,
+                contact_no: e.target.contact_no.value,
+                status: "pending",
+              };
+
+              axios
+                .post("http://localhost:3000/requested-foods", requestData)
+                .then(() => {
+                  alert("Food request submitted!");
+                  setRequestedFood([...requestedFood, requestData]);
+                  document.getElementById("foodRequestModal").close();
+                })
+                .catch((err) =>
+                  console.error("Error submitting request:", err)
+                );
+            }}
+            className="flex flex-col gap-4"
+          >
+            <input
+              type="text"
+              name="location"
+              placeholder="Your Location"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
+              required
+            />
+            <textarea
+              name="why_need_food"
+              placeholder="Why do you need this food?"
+              className="textarea textarea-bordered w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
+              rows={3}
+              required
+            ></textarea>
+            <input
+              type="text"
+              name="contact_no"
+              placeholder="Contact Number"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
+              required
+            />
+            <button type="submit" className="themeBtn w-full">
+              <span>Submit Request</span>
+            </button>
+          </form>
+        </div>
+      </dialog>
     </div>
   );
 };

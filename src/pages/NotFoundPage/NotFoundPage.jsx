@@ -1,7 +1,10 @@
 import React from "react";
 import { Link } from "react-router";
+import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
 
 const NotFoundPage = () => {
+  usePageTitle("404 Page Not Found");
+
   return (
     <div>
       <div className="flex flex-col items-center justify-center min-h-screen p-6">
