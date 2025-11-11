@@ -51,7 +51,7 @@ const Login = () => {
 
       try {
         const existingUser = await axios.get(
-          `http://localhost:3000/user/${user.email}`
+          `http://localhost:3000/user/email/${user.email}`
         );
         if (!existingUser.data) {
           await axios.post("http://localhost:3000/user", {

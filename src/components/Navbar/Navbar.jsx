@@ -169,11 +169,6 @@ const Navbar = () => {
                 className="dropdown-content menu bg-base-100 rounded-box z-100 w-52 p-2 shadow-sm"
               >
                 <li>
-                  <NavLink to="/dashboard" className={navLinkStyle}>
-                    Dashboard
-                  </NavLink>
-                </li>
-                <li>
                   <NavLink to="/create-food" className={navLinkStyle}>
                     Add Food
                   </NavLink>

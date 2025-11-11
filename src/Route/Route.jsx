@@ -5,11 +5,10 @@ import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import AvaiableAllFoods from "../pages/AvaiableAllFoods/AvaiableAllFoods";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
-import UserDetails from "../pages/UserDetails/UserDetails";
 import FoodDetails from "../pages/FoodDetails/FoodDetails";
 import CreateNewFood from "../pages/CreateNewFood/CreateNewFood";
-import UserDashboard from "../pages/UserDashboard/UserDashboard";
 import ManageMyFoods from "../pages/ManageMyFoods/ManageMyFoods";
+import MyFoodRequest from "../pages/MyFoodRequest/MyFoodRequest";
 
 export const router = createBrowserRouter([
   {
@@ -35,10 +34,6 @@ export const router = createBrowserRouter([
         Component: Register,
       },
       {
-        path: "/user/:id",
-        element: <UserDetails></UserDetails>,
-      },
-      {
         path: "/food/:id",
         element: <FoodDetails></FoodDetails>,
       },
@@ -47,12 +42,12 @@ export const router = createBrowserRouter([
         element: <CreateNewFood />,
       },
       {
-        path: "/dashboard",
-        element: <UserDashboard></UserDashboard>,
-      },
-      {
         path: "/manage-my-foods",
         element: <ManageMyFoods></ManageMyFoods>,
+      },
+      {
+        path: "/my-food-requests",
+        element: <MyFoodRequest></MyFoodRequest>,
       },
     ],
   },

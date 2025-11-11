@@ -170,14 +170,22 @@ const ManageMyFoods = () => {
                       {food.expire_date}
                     </td>
                     <td className="py-3 px-4 hidden md:table-cell">
-                      <span className="badge badge-success badge-outline text-xs sm:text-sm">
+                      <span
+                        className={`badge ${
+                          food.food_status === "Available"
+                            ? "badge-success "
+                            : "badge-error"
+                        } badge-outline text-xs sm:text-sm capitalize`}
+                      >
                         {food.food_status}
                       </span>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex justify-evenly items-center">
                         <button
-                          className="btn btn-warning text-white ml-3"
+                          className={`${
+                            food.food_status === "donated" ? "hidden" : ""
+                          } btn btn-warning text-white ml-3"`}
                           onClick={() => {
                             setSelectedFood(food);
                             reset({

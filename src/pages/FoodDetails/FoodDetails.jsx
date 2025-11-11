@@ -1,50 +1,92 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { useParams, Link } from "react-router";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
 import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
+import { AuthContext } from "../../context/AuthContext/AuthContext";
+import { use } from "react";
+import { toast } from "react-toastify";
 
 const FoodDetails = () => {
   const { id } = useParams();
-  const [food, setFood] = useState([]);
-  const [donator, setDonator] = useState([]);
-  const [requestedFood, setRequestedFood] = useState([]);
+  const queryClient = useQueryClient();
+  const { user } = use(AuthContext);
+  usePageTitle("Food Details");
 
-  useEffect(() => {
-    axios
-      .get(`http://localhost:3000/food/${id}`)
-      .then((res) => {
-        setFood(res.data);
-        if (res.data.user_id) {
-          axios
-            .get(`http://localhost:3000/user/${res.data.user_id}`)
-            .then((userRes) => setDonator(userRes.data))
-            .catch((err) => console.error("Error fetching donator:", err));
-        }
-      })
-      .catch((err) => console.error("Error fetching food:", err));
+  const { data: food, isLoading: foodLoading } = useQuery({
+    queryKey: ["food", id],
+    queryFn: async () => {
+      const res = await axios.get(`http://localhost:3000/food/${id}`);
+      return res.data;
+    },
+  });
 
-    axios
-      .get(`http://localhost:3000/requested-foods?food_id=${id}`)
-      .then((res) => {
-        setRequestedFood(res.data);
-      })
-      .catch((err) => console.error("Error fetching requested food:", err));
-  }, [id]);
+  const { data: donator } = useQuery({
+    queryKey: ["donator", food?.user_id],
+    enabled: !!food?.user_id,
+    queryFn: async () => {
+      const res = await axios.get(`http://localhost:3000/user/${food.user_id}`);
+      return res.data;
+    },
+  });
 
-  const {
-    food_name,
-    food_image,
-    food_quantity,
-    pickup_location,
-    expire_date,
-    additional_notes,
-    user_id,
-    food_status,
-  } = food;
+  const { data: requests = [] } = useQuery({
+    queryKey: ["requests", id],
+    queryFn: async () => {
+      const res = await axios.get(
+        `http://localhost:3000/requested-foods?food_id=${id}`
+      );
+      return res.data;
+    },
+  });
 
-  const { name, email, image } = donator;
+  const { register, handleSubmit, reset } = useForm();
 
-  usePageTitle(food_name);
+  const requestMutation = useMutation({
+    mutationFn: async (requestData) =>
+      axios.post("http://localhost:3000/requested-food", requestData),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["requests", id]);
+      document.getElementById("foodRequestModal").close();
+      reset();
+      toast.success("Food request submitted!");
+    },
+  });
+
+  const updateRequestStatus = useMutation({
+    mutationFn: async ({ requestId, status }) => {
+      await await axios.patch(
+        `http://localhost:3000/requested-food/${requestId}`,
+        { status }
+      );
+      if (status === "accepted") {
+        await axios.patch(`http://localhost:3000/food/${id}`, {
+          food_status: "donated",
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["requests", id]);
+      queryClient.invalidateQueries(["food", id]);
+    },
+  });
+
+  if (foodLoading) return <p>Loading food details...</p>;
+  if (!food) return <p>No food found.</p>;
+
+  const isOwner = user?.email === donator?.email;
+
+  const onSubmit = (data) => {
+    const requestData = {
+      ...data,
+      food_id: id,
+      user_name: user?.displayName,
+      user_email: user?.email,
+      user_image: user?.photoURL,
+      status: "pending",
+    };
+    requestMutation.mutate(requestData);
+  };
 
   return (
     <div className="w-11/12 max-w-7xl mx-auto py-10 sm:py-16">
@@ -52,141 +94,141 @@ const FoodDetails = () => {
         <div className="flex flex-col lg:flex-row">
           <div className="w-full lg:w-1/2">
             <img
-              src={food_image}
-              alt={food_name}
-              className="w-full h-64 sm:h-80 md:h-96 lg:h-full object-cover"
+              src={food.food_image}
+              alt={food.food_name}
+              className="w-full h-80 object-cover"
             />
           </div>
           <div className="w-full lg:w-1/2 p-6 sm:p-8 flex flex-col justify-center">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#3b7d5e] mb-3">
-              {food_name}
+            <h1 className="text-3xl font-bold text-[#3b7d5e] mb-3">
+              {food.food_name}
             </h1>
-            <p className="text-gray-600 mb-2">
-              <span className="font-semibold text-[#5dae61]">Serves:</span>{" "}
-              {food_quantity} people
+            <p>
+              <b>Serves:</b> {food.food_quantity} people
             </p>
-            <p className="text-gray-600 mb-2">
-              <span className="font-semibold text-[#5dae61]">Pickup:</span>{" "}
-              {pickup_location}
+            <p>
+              <b>Pickup:</b> {food.pickup_location}
             </p>
-            <p className="text-gray-600 mb-2">
-              <span className="font-semibold text-[#5dae61]">Expires:</span>{" "}
-              {expire_date}
+            <p>
+              <b>Expires:</b> {food.expire_date}
             </p>
-            <p className="text-gray-600 mb-4">
-              <span className="font-semibold text-[#5dae61]">Notes:</span>{" "}
-              {additional_notes}
+            <p>
+              <b>Notes:</b> {food.additional_notes}
             </p>
-            <div className="flex flex-wrap gap-3 items-center">
+
+            <div className="flex gap-3 mt-4">
               <span
-                className={`px-4 py-2 rounded-full font-semibold text-sm ${
-                  food_status === "Available"
-                    ? "bg-[#5dae61]/20 text-[#5dae61]"
+                className={`px-4 py-2 rounded-full font-semibold capitalize ${
+                  food.food_status === "Available"
+                    ? "bg-green-100 text-green-600"
                     : "bg-red-100 text-red-600"
                 }`}
               >
-                {food_status}
+                {food.food_status}
               </span>
 
-              <button
-                onClick={() =>
-                  document.getElementById("foodRequestModal").showModal()
-                }
-                className="themeBtn w-fit cursor-pointer"
-              >
-                <span className="w-auto">Request Food</span>
-              </button>
+              {food?.food_status !== "donated" && (
+                <button
+                  onClick={() => {
+                    const modal = document.getElementById("foodRequestModal");
+                    if (modal) modal.showModal();
+                  }}
+                  className="themeBtn w-full sm:w-auto mt-4 sm:mt-0"
+                >
+                  <span>Request Food</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
+
         {donator && (
-          <div className="p-6 border-t lg:border-t-0 lg:border-l border-gray-200 flex flex-col sm:flex-row lg:flex-col justify-center items-center gap-5 bg-gray-50">
-            <h2 className="text-2xl font-bold text-[#3b7d5e] text-center">
+          <div className="p-6 border-t bg-gray-50 flex flex-col items-center">
+            <h2 className="text-2xl font-bold text-[#3b7d5e] mb-2">
               Food Donator
             </h2>
-
-            <Link
-              to={`/user/${user_id}`}
-              className="flex flex-col sm:flex-row lg:flex-col items-center gap-4 text-center"
-            >
+            <div className="flex items-center gap-4">
               <img
-                src={image}
-                alt={name}
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4 border-[#5dae61] object-cover"
+                src={donator.image}
+                alt={donator.name}
+                className="w-20 h-20 rounded-full border-4 border-[#5dae61]"
               />
               <div>
-                <h3 className="text-lg font-semibold text-[#183153]">{name}</h3>
-                <p className="text-gray-600 text-sm">{email}</p>
+                <p className="font-semibold">{donator.name}</p>
+                <p className="text-gray-600 text-sm">{donator.email}</p>
               </div>
-            </Link>
+            </div>
           </div>
         )}
       </div>
-      <div className="pt-10 sm:pt-16">
-        <h1 className="montserrat text-2xl sm:text-3xl text-gradient mb-6">
-          {food_name}'s Requesters:{" "}
-          <span className="font-bold">{requestedFood.length}</span>
-        </h1>
-
-        <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-md bg-white">
-          <table className="min-w-full text-sm sm:text-base">
-            <thead className="bg-gray-100 border-b border-b-gray-300 font-medium text-[#3b7d5e]">
-              <tr>
-                <th className="text-left py-3 px-4">SL No</th>
-                <th className="text-left py-3 px-4">Receiver</th>
-                <th className="text-left py-3 px-4">Donator</th>
-                <th className="text-left py-3 px-4">Location</th>
-                <th className="text-left py-3 px-4">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {requestedFood.map((reqFood, index) => (
-                <tr
-                  key={index}
-                  className="border-b hover:bg-gray-100 transition-colors"
-                >
-                  <td className="py-3 px-4">{index + 1}</td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={reqFood.user_image}
-                        alt={reqFood.user_name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <div>
-                        <p className="font-medium">{reqFood.user_name}</p>
-                        <p className="text-gray-500 text-sm">
-                          {reqFood.user_email}
-                        </p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={image}
-                        alt={name}
-                        className="w-10 h-10 rounded-full object-cover"
-                      />
-                      <div>
-                        <p className="font-medium">{name}</p>
-                        <p className="text-gray-500 text-sm">{email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3 px-4">{reqFood.location}</td>
-                  <td className="py-3 px-4">
-                    <span className="badge badge-warning badge-outline">
-                      {reqFood.status}
-                    </span>
-                  </td>
+      {isOwner && (
+        <div className="pt-10">
+          <h1 className="text-2xl font-bold mb-4">
+            {food.food_name}'s Requests ({requests.length})
+          </h1>
+          <div className="overflow-x-auto rounded-lg border border-gray-300 shadow">
+            <table className="min-w-full text-sm">
+              <thead className="border-b border-gray-200 bg-gray-100">
+                <tr>
+                  <th className="p-3 text-left">Receiver</th>
+                  <th className="p-3 text-left">Location</th>
+                  <th className="p-3 text-left">Reason</th>
+                  <th className="p-3 text-left">Status</th>
+                  <th className="p-3 text-center">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {requests.map((r) => (
+                  <tr key={r._id} className="border-b border-gray-200">
+                    <td className="p-3 flex items-center gap-2">
+                      <img
+                        src={r.user_image}
+                        alt={r.user_name}
+                        className="w-10 h-10 rounded-full"
+                      />
+                      <div>
+                        <p className="font-medium">{r.user_name}</p>
+                        <p className="text-gray-500 text-xs">{r.user_email}</p>
+                      </div>
+                    </td>
+                    <td className="p-3">{r.location}</td>
+                    <td className="p-3">{r.why_need_food}</td>
+                    <td className="p-3 capitalize">{r.status}</td>
+                    <td className="p-3 text-center">
+                      {r.status === "pending" && (
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() =>
+                              updateRequestStatus.mutate({
+                                requestId: r._id,
+                                status: "accepted",
+                              })
+                            }
+                            className="px-3 py-1 bg-green-500 text-white rounded cursor-pointer"
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={() =>
+                              updateRequestStatus.mutate({
+                                requestId: r._id,
+                                status: "rejected",
+                              })
+                            }
+                            className="px-3 py-1 bg-red-500 text-white rounded cursor-pointer"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-      {/* Open the modal using document.getElementById('ID').showModal() method */}
+      )}
       <dialog
         id="foodRequestModal"
         className="modal fixed inset-0 z-50 flex justify-center items-center bg-black/50 p-4"
@@ -194,63 +236,34 @@ const FoodDetails = () => {
         <div className="modal-box p-6 sm:p-8 relative">
           <button
             onClick={() => document.getElementById("foodRequestModal").close()}
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 font-bold text-2xl cursor-pointer"
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
           >
             &times;
           </button>
 
           <h2 className="text-2xl font-bold text-[#3b7d5e] mb-4 text-center">
-            Request {food_name}
+            Request {food.food_name}
           </h2>
 
           <form
-            onSubmit={(e) => {
-              e.preventDefault();
-
-              const requestData = {
-                food_id: id,
-                user_name: e.target.user_name.value,
-                user_email: e.target.user_email.value,
-                user_image: e.target.user_image.value,
-                location: e.target.location.value,
-                why_need_food: e.target.why_need_food.value,
-                contact_no: e.target.contact_no.value,
-                status: "pending",
-              };
-
-              axios
-                .post("http://localhost:3000/requested-foods", requestData)
-                .then(() => {
-                  alert("Food request submitted!");
-                  setRequestedFood([...requestedFood, requestData]);
-                  document.getElementById("foodRequestModal").close();
-                })
-                .catch((err) =>
-                  console.error("Error submitting request:", err)
-                );
-            }}
+            onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >
             <input
-              type="text"
-              name="location"
+              {...register("location", { required: true })}
               placeholder="Your Location"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
-              required
+              className="border rounded px-4 py-2"
             />
             <textarea
-              name="why_need_food"
+              {...register("why_need_food", { required: true })}
               placeholder="Why do you need this food?"
-              className="textarea textarea-bordered w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
+              className="border rounded px-4 py-2"
               rows={3}
-              required
-            ></textarea>
+            />
             <input
-              type="text"
-              name="contact_no"
+              {...register("contact_no", { required: true })}
               placeholder="Contact Number"
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
-              required
+              className="border rounded px-4 py-2"
             />
             <button type="submit" className="themeBtn w-full">
               <span>Submit Request</span>

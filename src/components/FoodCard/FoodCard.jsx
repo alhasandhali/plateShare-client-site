@@ -1,12 +1,9 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./FoodCard.css";
 import { Link } from "react-router";
 import axios from "axios";
-import { AuthContext } from "../../context/AuthContext/AuthContext";
 
 const FoodCard = ({ food }) => {
-  const { user } = use(AuthContext);
-
   const {
     _id,
     food_name,
@@ -29,7 +26,7 @@ const FoodCard = ({ food }) => {
       .catch((err) => console.error(err));
   }, [user_id]);
 
-  const { name, image, email } = donator;
+  const { name, image } = donator;
 
   return (
     <div>
@@ -38,23 +35,20 @@ const FoodCard = ({ food }) => {
         <div className="card__shine"></div>
         <div className="card__glow"></div>
         <div className="card__content">
-          <div className="card__badge">{food_status}</div>
+          <div className="card__badge capitalize">{food_status}</div>
           <div className="card__image h-44 md:h-52">
             <img src={food_image} alt={food_name} />
           </div>
           <div className="flex justify-between items-center">
             <p className="card__title">{food_name}</p>
-            <Link
-              to={email === user?.email ? "/dashboard" : `/user/${user_id}`}
-              className="flex items-center gap-2 hover:font-bold"
-            >
+            <div className="flex items-center gap-2">
               <img
                 className="h-8 w-8 rounded-full bg-white border-2 border-[#3b7d5e]"
                 src={image}
                 alt={name}
               />
               <p className="card__description">{name}</p>
-            </Link>
+            </div>
           </div>
           <div className="flex justify-between items-center">
             <p className="card__description">
