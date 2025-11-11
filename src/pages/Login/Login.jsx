@@ -1,68 +1,95 @@
 import React, { use, useState } from "react";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
 import { GoogleAuthProvider } from "firebase/auth";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import axios from "axios";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { useMutation } from "@tanstack/react-query";
 
 const googleProvider = new GoogleAuthProvider();
 
 const Login = () => {
   usePageTitle("Login");
 
-  const { signInWithGoogle } = use(AuthContext);
+  const { signInWithGoogle, signInWithEmailPass, setUser } = use(AuthContext);
 
-  const handleGoogleLogin = () => {
-    signInWithGoogle(googleProvider)
-      .then(async (result) => {
-        const user = result.user;
-
-        const userData = {
-          name: user.displayName,
-          email: user.email,
-          image: user.photoURL,
-        };
-
-        try {
-          const existingUser = await axios.get(
-            `http://localhost:3000/user/${user.email}`
-          );
-
-          if (existingUser.data) {
-            console.log("User already exists:", existingUser.data);
-          } else {
-            const res = await axios.post(
-              "http://localhost:3000/user",
-              userData
-            );
-            console.log("New user added:", res.data);
-          }
-
-          alert("Login successful!");
-        } catch (err) {
-          if (err.response && err.response.status === 404) {
-            try {
-              const res = await axios.post(
-                "http://localhost:3000/user",
-                userData
-              );
-              console.log("New user added:", res.data);
-            } catch (postErr) {
-              console.error("Error saving new user:", postErr);
-            }
-          } else {
-            console.error("Login error:", err);
-          }
-        }
-      })
-      .catch((error) => {
-        console.error("Google sign-in error:", error.code, error.message);
-      });
-  };
-
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
 
+  const from = location.state?.from?.pathname || "/";
+
   const togglePassword = () => setShowPassword(!showPassword);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const emailLoginMutation = useMutation({
+    mutationFn: async ({ email, password }) => {
+      const result = await signInWithEmailPass(email, password);
+      return result.user;
+    },
+    onSuccess: async (user) => {
+      setUser(user);
+      toast.success("Login successful!");
+      navigate(from, { replace: true });
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to login");
+    },
+  });
+
+  const googleLoginMutation = useMutation({
+    mutationFn: async () => {
+      const result = await signInWithGoogle(googleProvider);
+      const user = result.user;
+
+      try {
+        const existingUser = await axios.get(
+          `http://localhost:3000/user/${user.email}`
+        );
+        if (!existingUser.data) {
+          await axios.post("http://localhost:3000/user", {
+            name: user.displayName,
+            email: user.email,
+            image: user.photoURL,
+          });
+        }
+      } catch (err) {
+        if (err.response && err.response.status === 404) {
+          await axios.post("http://localhost:3000/user", {
+            name: user.displayName,
+            email: user.email,
+            image: user.photoURL,
+          });
+        } else {
+          throw err;
+        }
+      }
+      return user;
+    },
+    onSuccess: (user) => {
+      setUser(user);
+      toast.success("Login successful!");
+      navigate(from, { replace: true });
+    },
+    onError: (error) => {
+      toast.error(error.message || "Google login failed");
+    },
+  });
+
+  const onSubmit = (data) => {
+    emailLoginMutation.mutate(data);
+  };
+
+  const handleGoogleLogin = () => {
+    googleLoginMutation.mutate();
+  };
 
   return (
     <div className="py-10 bg-linear-to-br from-[#5dae61] via-[#3b7d5e] to-[#183153]">
@@ -72,32 +99,44 @@ const Login = () => {
             Welcome Back
           </h1>
           <p className="text-gray-600 mb-8">Login to continue your journey</p>
-          <form className="space-y-5 text-left">
+          {/* Form */}
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-5 text-left"
+          >
             <div>
               <label className="block text-gray-700 font-semibold mb-1">
                 Email
               </label>
               <input
+                {...register("email", { required: "Email is required" })}
                 type="email"
-                name="email"
                 placeholder="Enter your email"
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
               />
+              {errors.email && (
+                <p className="text-red-400 text-sm">{errors.email.message}</p>
+              )}
             </div>
+
             <div>
               <label className="block text-gray-700 font-semibold mb-1">
                 Password
               </label>
               <div className="mt-1 relative">
                 <input
-                  id="password"
-                  name="password"
+                  {...register("password", {
+                    required: "Password is required",
+                  })}
                   type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
                   placeholder="••••••••"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
                 />
+                {errors.password && (
+                  <p className="text-red-400 text-sm">
+                    {errors.password.message}
+                  </p>
+                )}
                 <button
                   type="button"
                   onClick={togglePassword}
@@ -144,8 +183,15 @@ const Login = () => {
                 </button>
               </div>
             </div>
-            <button className="themeBtn w-full">
-              <span>Login</span>
+
+            <button
+              type="submit"
+              className="themeBtn w-full"
+              disabled={emailLoginMutation.isLoading}
+            >
+              <span>
+                {emailLoginMutation.isLoading ? "Logging in..." : "Login"}
+              </span>
             </button>
           </form>
           <div className="relative my-8">
@@ -185,7 +231,7 @@ const Login = () => {
                 ></path>
               </g>
             </svg>
-            Sign In With Google
+            Login With Google
           </button>
           <p className="mt-6 text-gray-600">
             Don’t have an account?{" "}
