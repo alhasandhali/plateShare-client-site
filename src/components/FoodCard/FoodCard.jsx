@@ -45,7 +45,7 @@ const FoodCard = ({ food }) => {
           <div className="flex justify-between items-center">
             <p className="card__title">{food_name}</p>
             <Link
-              to={email === user.email ? "/dashboard" : `/user/${user_id}`}
+              to={email === user?.email ? "/dashboard" : `/user/${user_id}`}
               className="flex items-center gap-2 hover:font-bold"
             >
               <img
