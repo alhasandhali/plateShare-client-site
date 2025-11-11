@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import "./FoodCard.css";
 import { Link } from "react-router";
 import axios from "axios";
+import { AuthContext } from "../../context/AuthContext/AuthContext";
 
 const FoodCard = ({ food }) => {
+  const { user } = use(AuthContext);
+
   const {
     _id,
     food_name,
@@ -26,7 +29,7 @@ const FoodCard = ({ food }) => {
       .catch((err) => console.error(err));
   }, [user_id]);
 
-  const { name, image } = donator;
+  const { name, image, email } = donator;
 
   return (
     <div>
@@ -42,7 +45,7 @@ const FoodCard = ({ food }) => {
           <div className="flex justify-between items-center">
             <p className="card__title">{food_name}</p>
             <Link
-              to={`/user/${user_id}`}
+              to={email === user.email ? "/dashboard" : `/user/${user_id}`}
               className="flex items-center gap-2 hover:font-bold"
             >
               <img
