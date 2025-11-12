@@ -43,29 +43,41 @@ const MyFoodRequest = () => {
 
   return (
     <div className="w-11/12 max-w-7xl mx-auto py-10 sm:py-16">
-      <h1 className="text-3xl sm:text-4xl font-bold text-[#3b7d5e] mb-8 text-center">
+      <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#3b7d5e] mb-8 text-center">
         My Food Requests ({myRequests.length})
       </h1>
-
       <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-md bg-white">
         <table className="min-w-full text-sm sm:text-base">
           <thead className="bg-gray-100 border-b border-b-gray-300 font-medium text-[#3b7d5e]">
             <tr>
-              <th className="py-3 px-4 text-left">Food</th>
-              <th className="py-3 px-4 text-left">Donator</th>
-              <th className="py-3 px-4 text-left">Location</th>
-              <th className="py-3 px-4 text-left">Reason</th>
-              <th className="py-3 px-4 text-left">Contact</th>
-              <th className="py-3 px-4 text-left">Status</th>
+              <th className="py-3 px-3 sm:px-4 text-left">Food</th>
+              <th className="py-3 px-3 sm:px-4 text-left hidden sm:table-cell">
+                Donator
+              </th>
+              <th className="py-3 px-3 sm:px-4 text-left hidden md:table-cell">
+                Location
+              </th>
+              <th className="py-3 px-3 sm:px-4 text-left hidden lg:table-cell">
+                Reason
+              </th>
+              <th className="py-3 px-3 sm:px-4 text-left hidden md:table-cell">
+                Contact
+              </th>
+              <th className="py-3 px-3 sm:px-4 text-left">Status</th>
             </tr>
           </thead>
           <tbody>
             {myRequests.map((req) => (
-              <MyFoodRequestRow key={req._id} req={req}></MyFoodRequestRow>
+              <MyFoodRequestRow key={req._id} req={req} />
             ))}
           </tbody>
         </table>
       </div>
+      {myRequests.length === 0 && (
+        <p className="text-center text-gray-500 text-base sm:text-lg mt-8">
+          You haven’t requested any food yet.
+        </p>
+      )}
     </div>
   );
 };

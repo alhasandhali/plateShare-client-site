@@ -90,11 +90,6 @@ const Navbar = () => {
                     )}
                     <ul className="p-2">
                       <li>
-                        <NavLink to="/dashboard" className={navLinkStyle}>
-                          Dashboard
-                        </NavLink>
-                      </li>
-                      <li>
                         <NavLink to="/create-food" className={navLinkStyle}>
                           Add Food
                         </NavLink>
@@ -126,31 +121,21 @@ const Navbar = () => {
                   Available Foods
                 </NavLink>
               </li>
-              <li>
-                {user ? (
-                  <button
-                    onClick={handleLogout}
-                    className="btn montserrat text-sm text-white bg-gradian mt-3"
-                  >
-                    <span>Logout</span>
-                  </button>
-                ) : (
-                  <div className="flex flex-col gap-1">
-                    <NavLink
-                      to="/register"
-                      className="btn montserrat text-sm text-white bg-gradian mt-3"
-                    >
-                      Registration
-                    </NavLink>
-                    <NavLink
-                      to="/login"
-                      className="btn montserrat text-sm text-white bg-gradian mt-3"
-                    >
-                      Login
-                    </NavLink>
-                  </div>
-                )}
-              </li>
+              {user ? (
+                <button
+                  onClick={handleLogout}
+                  className="btn montserrat text-sm text-white bg-gradian mt-3"
+                >
+                  <span>Logout</span>
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="btn montserrat text-sm text-white bg-gradian mt-3"
+                >
+                  Login
+                </Link>
+              )}
             </ul>
           </div>
           {user ? (
@@ -192,9 +177,9 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="hidden lg:flex gap-3">
-              <NavLink to="/login" className="themeBtn w-fit">
+              <Link to="/login" className="themeBtn w-fit">
                 <span className="w-auto">Login</span>
-              </NavLink>
+              </Link>
             </div>
           )}
         </div>

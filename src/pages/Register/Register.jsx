@@ -113,7 +113,7 @@ const Register = () => {
     <div className="bg-linear-to-br from-[#5dae61] via-[#3b7d5e] to-[#183153] py-10">
       <div className="flex items-center justify-center w-11/12 m-auto">
         <div className="bg-white backdrop-blur-md shadow-2xl rounded-lg p-8 w-full max-w-md text-center">
-          <h1 className="text-3xl font-bold mb-2 text-[#3b7d5e]">
+          <h1 className="text-3xl font-bold mb-2 text-gradient">
             Create an Account
           </h1>
           <p className="text-gray-600 mb-8">

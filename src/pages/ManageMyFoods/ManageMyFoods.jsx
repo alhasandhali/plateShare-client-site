@@ -111,46 +111,49 @@ const ManageMyFoods = () => {
   };
 
   return (
-    <div className="md:w-11/12 m-auto py-10">
+    <div className="w-11/12 max-w-7xl mx-auto py-10">
       <h1 className="montserrat font-bold text-gradient text-3xl text-center">
         My Foods
       </h1>
 
       <div className="mt-10 lg:mt-16">
-        <h2 className="text-2xl sm:text-3xl font-semibold text-gradient mb-6">
+        <h2 className="text-2xl sm:text-3xl font-semibold text-gradient mb-6 text-center sm:text-left">
           Available Foods:{" "}
           <span className="font-bold">{donatorFood.length}</span>
         </h2>
 
         {donatorFood.length === 0 ? (
-          <p className="text-center text-gray-500">
+          <p className="text-center text-gray-500 text-base sm:text-lg">
             You have not donated any foods yet.
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-md">
-            <table className="min-w-full border-collapse text-sm sm:text-base">
+          <div className="overflow-x-auto border border-gray-200 rounded-lg shadow-md bg-white">
+            <table className="min-w-full text-sm sm:text-base">
               <thead className="bg-gray-100 text-gray-700">
                 <tr className="font-semibold">
-                  <th className="text-left py-3 px-4">SL</th>
-                  <th className="text-left py-3 px-4">Food</th>
-                  <th className="text-left py-3 px-4 hidden md:table-cell">
+                  <th className="text-left py-3 px-3 sm:px-4">SL</th>
+                  <th className="text-left py-3 px-3 sm:px-4">Food</th>
+                  <th className="text-left py-3 px-3 sm:px-4 hidden md:table-cell">
                     Serves
                   </th>
-                  <th className="text-left py-3 px-4 hidden md:table-cell">
+                  <th className="text-left py-3 px-3 sm:px-4 hidden lg:table-cell">
                     Exp. Date
                   </th>
-                  <th className="text-left py-3 px-4">Status</th>
-                  <th className="text-center py-3 px-4">Actions</th>
+                  <th className="text-left py-3 px-3 sm:px-4 hidden sm:table-cell">
+                    Status
+                  </th>
+                  <th className="text-center py-3 px-3 sm:px-4">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {donatorFood.map((food, index) => (
                   <tr
                     key={index}
-                    className="border-b border-gray-200 hover:bg-gray-100 transition"
+                    className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
                   >
-                    <td className="py-3 px-4">{index + 1}</td>
-                    <td className="py-3 px-4">
+                    <td className="py-3 px-3 sm:px-4">{index + 1}</td>
+
+                    <td className="py-3 px-3 sm:px-4">
                       <Link
                         to={`/food/${food._id}`}
                         className="flex items-center gap-3"
@@ -165,27 +168,29 @@ const ManageMyFoods = () => {
                         </p>
                       </Link>
                     </td>
-                    <td className="py-3 px-4">{food.food_quantity}</td>
-                    <td className="py-3 px-4 hidden md:table-cell">
+                    <td className="py-3 px-3 sm:px-4 hidden md:table-cell">
+                      {food.food_quantity}
+                    </td>
+                    <td className="py-3 px-3 sm:px-4 hidden lg:table-cell">
                       {food.expire_date}
                     </td>
-                    <td className="py-3 px-4 hidden md:table-cell">
+                    <td className="py-3 px-3 sm:px-4 hidden sm:table-cell">
                       <span
                         className={`badge ${
                           food.food_status === "Available"
-                            ? "badge-success "
+                            ? "badge-success"
                             : "badge-error"
                         } badge-outline text-xs sm:text-sm capitalize`}
                       >
                         {food.food_status}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
-                      <div className="flex justify-evenly items-center">
+                    <td className="py-3 px-3 sm:px-4">
+                      <div className="flex flex-col sm:flex-row justify-center sm:justify-evenly items-center gap-2">
                         <button
                           className={`${
                             food.food_status === "donated" ? "hidden" : ""
-                          } btn btn-warning text-white ml-3"`}
+                          } btn btn-warning text-white w-full sm:w-auto`}
                           onClick={() => {
                             setSelectedFood(food);
                             reset({
@@ -203,9 +208,8 @@ const ManageMyFoods = () => {
                         >
                           Update
                         </button>
-
                         <button
-                          className="btn btn-error text-white"
+                          className="btn btn-error text-white w-full sm:w-auto"
                           onClick={() => handleDelete(food._id)}
                         >
                           Delete
@@ -219,24 +223,22 @@ const ManageMyFoods = () => {
           </div>
         )}
       </div>
-      {/* Open the modal using document.getElementById('ID').showModal() method */}
       <dialog
         id="updateFoodModal"
         className="modal modal-bottom sm:modal-middle"
       >
-        <div className="modal-box">
+        <div className="modal-box w-11/12 max-w-2xl">
           <form method="dialog">
             <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">
               ✕
             </button>
           </form>
-          <h1 className="text-3xl sm:text-4xl font-bold text-center text-gradient mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-center text-gradient mb-4">
             Update Food
           </h1>
-          {/* Form */}
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6"
           >
             <div className="flex flex-col md:col-span-2">
               <label className="font-semibold text-gradient mb-1">
@@ -248,15 +250,14 @@ const ManageMyFoods = () => {
                 })}
                 type="text"
                 placeholder="Enter food name"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
+                className="input input-bordered w-full"
               />
               {errors.food_name && (
-                <p className="text-red-500 text-sm">
+                <p className="text-red-500 text-sm mt-1">
                   {errors.food_name.message}
                 </p>
               )}
             </div>
-
             <div className="flex flex-col">
               <label className="font-semibold text-gradient mb-1">
                 Food Image URL
@@ -267,15 +268,14 @@ const ManageMyFoods = () => {
                 })}
                 type="url"
                 placeholder="https://example.com/image.jpg"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
+                className="input input-bordered w-full"
               />
               {errors.food_image && (
-                <p className="text-red-500 text-sm">
+                <p className="text-red-500 text-sm mt-1">
                   {errors.food_image.message}
                 </p>
               )}
             </div>
-
             <div className="flex flex-col">
               <label className="font-semibold text-gradient mb-1">
                 Quantity (Serves People)
@@ -288,15 +288,14 @@ const ManageMyFoods = () => {
                 type="number"
                 min="1"
                 placeholder="e.g. 4"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
+                className="input input-bordered w-full"
               />
               {errors.food_quantity && (
-                <p className="text-red-500 text-sm">
+                <p className="text-red-500 text-sm mt-1">
                   {errors.food_quantity.message}
                 </p>
               )}
             </div>
-
             <div className="flex flex-col">
               <label className="font-semibold text-gradient mb-1">
                 Pickup Location
@@ -307,15 +306,14 @@ const ManageMyFoods = () => {
                 })}
                 type="text"
                 placeholder="123 Main St, City"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
+                className="input input-bordered w-full"
               />
               {errors.pickup_location && (
-                <p className="text-red-500 text-sm">
+                <p className="text-red-500 text-sm mt-1">
                   {errors.pickup_location.message}
                 </p>
               )}
             </div>
-
             <div className="flex flex-col">
               <label className="font-semibold text-gradient mb-1">
                 Expiration Date
@@ -325,31 +323,29 @@ const ManageMyFoods = () => {
                   required: "Expiration date is required",
                 })}
                 type="date"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
+                className="input input-bordered w-full"
               />
               {errors.expire_date && (
-                <p className="text-red-500 text-sm">
+                <p className="text-red-500 text-sm mt-1">
                   {errors.expire_date.message}
                 </p>
               )}
             </div>
-
             <div className="flex flex-col md:col-span-2">
               <label className="font-semibold text-gradient mb-1">
                 Additional Notes
               </label>
               <textarea
                 {...register("additional_notes")}
-                placeholder="Add any special instructions or packaging notes..."
+                placeholder="Add any special instructions..."
                 rows="4"
-                className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#5dae61]"
+                className="textarea textarea-bordered w-full"
               ></textarea>
             </div>
-
-            <div className="md:col-span-2 flex justify-center mt-2">
+            <div className="md:col-span-2 flex justify-center mt-4">
               <button
                 type="submit"
-                className="themeBtn w-fit"
+                className="themeBtn w-full sm:w-auto"
                 disabled={updateFoodMutation.isLoading}
               >
                 <span>
