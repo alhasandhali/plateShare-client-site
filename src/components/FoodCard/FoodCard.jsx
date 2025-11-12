@@ -37,7 +37,7 @@ const FoodCard = ({ food }) => {
         <div className="card__content">
           <div className="card__badge capitalize">{food_status}</div>
           <div className="card__image h-44 md:h-52">
-            <img src={food_image} alt={food_name} />
+            <img className="h-full w-full" src={food_image} alt={food_name} />
           </div>
           <div className="flex justify-between items-center">
             <p className="card__title">{food_name}</p>

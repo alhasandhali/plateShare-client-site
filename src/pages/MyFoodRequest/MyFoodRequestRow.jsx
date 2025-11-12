@@ -4,7 +4,7 @@ import React from "react";
 import { Link } from "react-router";
 
 const MyFoodRequestRow = ({ req }) => {
-  const { data: food } = useQuery({
+  const { data: food, isLoading } = useQuery({
     queryKey: ["food", req.food_id],
     enabled: !!req.food_id,
     queryFn: async () => {
@@ -12,6 +12,29 @@ const MyFoodRequestRow = ({ req }) => {
       return res.data;
     },
   });
+
+  if (isLoading) {
+    return (
+      <tr>
+        <td colSpan="6" className="text-center py-4 text-gray-500">
+          Loading...
+        </td>
+      </tr>
+    );
+  }
+
+  if (!food) {
+    return (
+      <tr>
+        <td colSpan="6" className="text-center py-4 text-gray-500">
+          No food data found
+        </td>
+      </tr>
+    );
+  }
+
+  console.log(food);
+
   return (
     <tr
       key={req._id}

@@ -92,15 +92,15 @@ const FoodDetails = () => {
     <div className="w-11/12 max-w-7xl mx-auto py-10 sm:py-16">
       <div className="bg-white/95 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden">
         <div className="flex flex-col lg:flex-row">
-          <div className="w-full lg:w-1/2">
+          <div className="w-full lg:w-1/2 flex justify-center items-center">
             <img
               src={food.food_image}
               alt={food.food_name}
-              className="w-full h-80 object-cover"
+              className="w-fit h-80 object-cover"
             />
           </div>
           <div className="w-full lg:w-1/2 p-6 sm:p-8 flex flex-col justify-center">
-            <h1 className="text-3xl font-bold text-[#3b7d5e] mb-3">
+            <h1 className="text-3xl font-bold text-gradient mb-3">
               {food.food_name}
             </h1>
             <p>
@@ -112,20 +112,20 @@ const FoodDetails = () => {
             <p>
               <b>Expires:</b> {food.expire_date}
             </p>
-            <p>
+            <p className="text-justify">
               <b>Notes:</b> {food.additional_notes}
             </p>
 
-            <div className="flex gap-3 mt-4">
-              <span
-                className={`px-4 py-2 rounded-full font-semibold capitalize ${
+            <div className="flex gap-3 flex-col md:flex-row mt-4">
+              <p
+                className={`px-4 py-2 text-center rounded-full font-semibold capitalize ${
                   food.food_status === "Available"
                     ? "bg-green-100 text-green-600"
                     : "bg-red-100 text-red-600"
                 }`}
               >
                 {food.food_status}
-              </span>
+              </p>
 
               {food?.food_status !== "donated" && (
                 <button
@@ -143,8 +143,8 @@ const FoodDetails = () => {
         </div>
 
         {donator && (
-          <div className="p-6 border-t bg-gray-50 flex flex-col items-center">
-            <h2 className="text-2xl font-bold text-[#3b7d5e] mb-2">
+          <div className="p-6 border-t border-gray-300 bg-gray-50 flex flex-col items-center">
+            <h2 className="text-2xl font-bold text-gradient mb-2">
               Food Donator
             </h2>
             <div className="flex items-center gap-4">

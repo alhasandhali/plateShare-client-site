@@ -10,7 +10,6 @@ const MyFoodRequest = () => {
   const { user } = use(AuthContext);
   usePageTitle("My Food Requests");
 
-  // Fetch user's requested foods
   const { data: myRequests = [], isLoading } = useQuery({
     queryKey: ["myRequests", user?.email],
     enabled: !!user?.email,
@@ -48,7 +47,6 @@ const MyFoodRequest = () => {
         My Food Requests ({myRequests.length})
       </h1>
 
-      {/* Table for larger screens */}
       <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-md bg-white">
         <table className="min-w-full text-sm sm:text-base">
           <thead className="bg-gray-100 border-b border-b-gray-300 font-medium text-[#3b7d5e]">
