@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
+import CustomLoader from "../../components/CustomLoader/CustomLoader";
 import { use } from "react";
 import { toast } from "react-toastify";
 
@@ -55,10 +56,9 @@ const FoodDetails = () => {
 
   const updateRequestStatus = useMutation({
     mutationFn: async ({ requestId, status }) => {
-      await await axios.patch(
-        `http://localhost:3000/requested-food/${requestId}`,
-        { status }
-      );
+      await axios.patch(`http://localhost:3000/requested-food/${requestId}`, {
+        status,
+      });
       if (status === "accepted") {
         await axios.patch(`http://localhost:3000/food/${id}`, {
           food_status: "donated",
@@ -71,8 +71,20 @@ const FoodDetails = () => {
     },
   });
 
-  if (foodLoading) return <p>Loading food details...</p>;
-  if (!food) return <p>No food found.</p>;
+  if (foodLoading) return <CustomLoader />;
+  if (!food)
+    return (
+      <div className="w-11/12 mx-auto py-10">
+        <p className="montserrat mt-4 text-gradient font-semibold text-2xl leading-relaxed tracking-widest capitalize text-center">
+          No food found.
+        </p>
+        <div className="flex justify-center mt-8">
+          <Link to="/available-foods" className="themeBtn w-fit">
+            <span className="w-auto px-6 py-3 font-semibold">Show All</span>
+          </Link>
+        </div>
+      </div>
+    );
 
   const isOwner = user?.email === donator?.email;
 

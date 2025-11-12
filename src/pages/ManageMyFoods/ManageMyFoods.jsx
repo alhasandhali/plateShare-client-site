@@ -4,6 +4,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
+import CustomLoader from "../../components/CustomLoader/CustomLoader";
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
 
@@ -66,21 +67,8 @@ const ManageMyFoods = () => {
     enabled: !!user?.email,
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-gray-500 text-lg">Loading your foods...</p>
-      </div>
-    );
-  }
-
   if (isError) {
     toast.error(error.message || "Failed to fetch your foods.");
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-red-500 text-lg">Error loading foods.</p>
-      </div>
-    );
   }
 
   const handleDelete = (foodId) => {
@@ -122,7 +110,15 @@ const ManageMyFoods = () => {
           <span className="font-bold">{donatorFood.length}</span>
         </h2>
 
-        {donatorFood.length === 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center items-center min-h-screen">
+            <CustomLoader />
+          </div>
+        ) : isError ? (
+          <div className="flex justify-center items-center min-h-screen">
+            <p className="text-red-500 text-lg">Error loading foods.</p>
+          </div>
+        ) : donatorFood.length === 0 ? (
           <p className="text-center text-gray-500 text-base sm:text-lg">
             You have not donated any foods yet.
           </p>

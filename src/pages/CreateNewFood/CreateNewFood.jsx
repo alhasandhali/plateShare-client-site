@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
+import CustomLoader from "../../components/CustomLoader/CustomLoader";
 
 const CreateNewFood = () => {
   usePageTitle("New Food");
@@ -68,7 +69,12 @@ const CreateNewFood = () => {
   };
 
   return (
-    <div>
+    <div className="relative">
+      {addFoodMutation.isLoading && (
+        <div className="absolute inset-0 bg-white/70 flex justify-center items-center z-50">
+          <CustomLoader />
+        </div>
+      )}
       <div className="min-h-screen bg-linear-to-b from-white to-[#f1f5f2] flex justify-center items-center py-10 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-4xl bg-white/90 backdrop-blur-md shadow-2xl rounded-2xl p-8 sm:p-10">
           <h1 className="text-3xl sm:text-4xl font-bold text-center text-gradient mb-8">

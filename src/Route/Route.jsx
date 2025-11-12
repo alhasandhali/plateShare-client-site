@@ -1,7 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import App from "../App";
 import Home from "../pages/Home/Home";
-import NotFoundPage from "../pages/NotFoundPage/NotFoundPage";
 import AvaiableAllFoods from "../pages/AvaiableAllFoods/AvaiableAllFoods";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
@@ -9,12 +8,13 @@ import FoodDetails from "../pages/FoodDetails/FoodDetails";
 import CreateNewFood from "../pages/CreateNewFood/CreateNewFood";
 import ManageMyFoods from "../pages/ManageMyFoods/ManageMyFoods";
 import MyFoodRequest from "../pages/MyFoodRequest/MyFoodRequest";
+import ErrorPage from "../pages/ErrorPage/ErrorPage";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     Component: App,
-    errorElement: <NotFoundPage></NotFoundPage>,
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
