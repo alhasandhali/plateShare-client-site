@@ -1,12 +1,12 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
 import { GoogleAuthProvider } from "firebase/auth";
-import { AuthContext } from "../../context/AuthContext/AuthContext";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
+import useAuth from "../../hooks/useAuth";
+import useAxios from "../../hooks/useAxios";
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -14,9 +14,9 @@ const rex = /^(?=.*[A-Z])(?=.*[a-z]).{6,}$/;
 
 const Register = () => {
   usePageTitle("Registration");
-  const { signInWithGoogle, signUpWithEmailPass, updateUser, setUser, user } =
-    use(AuthContext);
-
+  const { signInWithGoogle, signUpWithEmailPass, updateUser, setUser } =
+    useAuth();
+  const customAxios = useAxios();
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const togglePassword = () => setShowPassword(!showPassword);
@@ -44,16 +44,9 @@ const Register = () => {
 
   const saveUserMutation = useMutation({
     mutationFn: async (userData) => {
-      const idToken = await user.getIdToken();
-      const { data } = await axios.post(
-        "http://localhost:3000/user",
-        userData,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
+      console.log("Ami data pathanor age");
+      const { data } = await customAxios.post("/user", userData);
+      console.log("Ami data: ", data);
       return data;
     },
     onSuccess: (data, variables) => {
@@ -66,6 +59,7 @@ const Register = () => {
       navigate("/");
     },
     onError: (error) => {
+      console.log("ami akhan theke bolci 1");
       toast.error(error.message || "Failed to register user");
     },
   });
@@ -87,6 +81,7 @@ const Register = () => {
       saveUserMutation.mutate(userData);
       reset();
     } catch (error) {
+      console.log("ami akhan theke bolci 2");
       toast.error(error.message);
     }
   };

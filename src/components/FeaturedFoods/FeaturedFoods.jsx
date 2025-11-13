@@ -1,23 +1,22 @@
 import React from "react";
-import axios from "axios";
 import FoodCard from "../FoodCard/FoodCard";
 import { Link } from "react-router";
 import CustomLoader from "../CustomLoader/CustomLoader";
 import { useQuery } from "@tanstack/react-query";
-
-const fetchFoods = async () => {
-  const { data } = await axios.get("http://localhost:3000/featured-foods");
-  return data;
-};
+import useAxios from "../../hooks/useAxios";
 
 const FeaturedFoods = () => {
+  const customAxios = useAxios();
   const {
     data: foods = [],
     isLoading,
     isError,
   } = useQuery({
     queryKey: ["foods"],
-    queryFn: fetchFoods,
+    queryFn: async () => {
+      const { data } = await customAxios.get("/featured-foods");
+      return data;
+    },
   });
 
   return (

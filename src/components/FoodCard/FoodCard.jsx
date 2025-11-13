@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "./FoodCard.css";
 import { Link } from "react-router";
-import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+import useAxios from "../../hooks/useAxios";
 
 const FoodCard = ({ food }) => {
+  const customAxios = useAxios();
   const {
     _id,
     food_name,
@@ -15,18 +17,15 @@ const FoodCard = ({ food }) => {
     food_status,
   } = food;
 
-  const [donator, setDonator] = useState([]);
+  const { data: donator } = useQuery({
+    queryKey: ["donator", user_id],
+    queryFn: async () => {
+      const res = await customAxios.get(`/user/${user_id}`);
+      return res.data;
+    },
+  });
 
-  useEffect(() => {
-    axios
-      .get(`http://localhost:3000/user/${user_id}`)
-      .then((res) => {
-        setDonator(res.data);
-      })
-      .catch((err) => console.error(err));
-  }, [user_id]);
-
-  const { name, image } = donator;
+  const { name, image } = donator || {};
 
   return (
     <div>

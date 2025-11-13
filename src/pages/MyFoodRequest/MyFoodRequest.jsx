@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { Link } from "react-router";
 import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
-import { use } from "react";
-import { AuthContext } from "../../context/AuthContext/AuthContext";
 import MyFoodRequestRow from "./MyFoodRequestRow";
 import CustomLoader from "../../components/CustomLoader/CustomLoader";
+import useAuth from "../../hooks/useAuth";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const MyFoodRequest = () => {
-  const { user } = use(AuthContext);
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
   usePageTitle("My Food Requests");
 
   const {
@@ -19,15 +19,7 @@ const MyFoodRequest = () => {
     queryKey: ["myRequests", user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
-      const idToken = await user.getIdToken();
-      const res = await axios.get(
-        `http://localhost:3000/requested-foods?email=${user.email}`,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
+      const res = await axiosSecure.get(`/requested-foods?email=${user.email}`);
       return res.data;
     },
   });

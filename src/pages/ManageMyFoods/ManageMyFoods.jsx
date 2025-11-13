@@ -1,15 +1,18 @@
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { toast } from "react-toastify";
-import { AuthContext } from "../../context/AuthContext/AuthContext";
 import CustomLoader from "../../components/CustomLoader/CustomLoader";
 import Swal from "sweetalert2";
 import { useForm } from "react-hook-form";
+import useAuth from "../../hooks/useAuth";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import useAxios from "../../hooks/useAxios";
 
 const ManageMyFoods = () => {
-  const { user } = use(AuthContext);
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
+  const customAxios = useAxios();
 
   const {
     register,
@@ -22,16 +25,7 @@ const ManageMyFoods = () => {
 
   const updateFoodMutation = useMutation({
     mutationFn: async ({ foodId, updatedData }) => {
-      const idToken = await user.getIdToken();
-      const { data } = await axios.patch(
-        `http://localhost:3000/food/${foodId}`,
-        updatedData,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
+      const { data } = await axiosSecure.patch(`/food/${foodId}`, updatedData);
       return data;
     },
     onSuccess: () => {
@@ -56,8 +50,8 @@ const ManageMyFoods = () => {
 
   const fetchDonatorFoods = async () => {
     if (!user?.email) return [];
-    const { data } = await axios.get(
-      `http://localhost:3000/foods?donator_email=${user.email}`
+    const { data } = await customAxios.get(
+      `/foods?donator_email=${user.email}`
     );
     return data;
   };
@@ -90,12 +84,7 @@ const ManageMyFoods = () => {
 
     if (result.isConfirmed) {
       try {
-        const idToken = await user.getIdToken();
-        await axios.delete(`http://localhost:3000/food/${foodId}`, {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        });
+        await axiosSecure.delete(`/food/${foodId}`);
         toast.success("Food deleted successfully!");
         window.location.reload();
 

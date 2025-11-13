@@ -1,28 +1,23 @@
-import axios from "axios";
 import { useParams, Link } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
-import { AuthContext } from "../../context/AuthContext/AuthContext";
 import CustomLoader from "../../components/CustomLoader/CustomLoader";
-import { use } from "react";
+import useAuth from "../../hooks/useAuth";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 import { toast } from "react-toastify";
 
 const FoodDetails = () => {
   const { id } = useParams();
   const queryClient = useQueryClient();
-  const { user } = use(AuthContext);
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
   usePageTitle("Food Details");
 
   const { data: food, isLoading: foodLoading } = useQuery({
     queryKey: ["food", id],
     queryFn: async () => {
-      const idToken = await user.getIdToken();
-      const res = await axios.get(`http://localhost:3000/food/${id}`, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
+      const res = await axiosSecure.get(`/food/${id}`);
       return res.data;
     },
   });
@@ -31,15 +26,7 @@ const FoodDetails = () => {
     queryKey: ["donator", food?.user_id],
     enabled: !!food?.user_id,
     queryFn: async () => {
-      const idToken = await user.getIdToken();
-      const res = await axios.get(
-        `http://localhost:3000/user/${food.user_id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
+      const res = await axiosSecure.get(`/user/${food.user_id}`);
       return res.data;
     },
   });
@@ -47,15 +34,7 @@ const FoodDetails = () => {
   const { data: requests = [] } = useQuery({
     queryKey: ["requests", id],
     queryFn: async () => {
-      const idToken = await user.getIdToken();
-      const res = await axios.get(
-        `http://localhost:3000/requested-foods?food_id=${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
+      const res = await axiosSecure.get(`/requested-foods?food_id=${id}`);
       return res.data;
     },
   });
@@ -64,16 +43,7 @@ const FoodDetails = () => {
 
   const requestMutation = useMutation({
     mutationFn: async (requestData) => {
-      const idToken = await user.getIdToken();
-      const { data } = await axios.post(
-        "http://localhost:3000/requested-food",
-        requestData,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
+      const { data } = await axiosSecure.post("/requested-food", requestData);
       return data;
     },
     onSuccess: () => {
@@ -86,28 +56,10 @@ const FoodDetails = () => {
 
   const updateRequestStatus = useMutation({
     mutationFn: async ({ requestId, status }) => {
-      const idToken = await user.getIdToken();
-
-      await axios.patch(
-        `http://localhost:3000/requested-food/${requestId}`,
-        { status },
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
+      await axiosSecure.patch(`/requested-food/${requestId}`, { status });
 
       if (status === "accepted") {
-        await axios.patch(
-          `http://localhost:3000/food/${id}`,
-          { food_status: "donated" },
-          {
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-            },
-          }
-        );
+        await axiosSecure.patch(`/food/${id}`, { food_status: "donated" });
       }
     },
     onSuccess: () => {

@@ -1,19 +1,20 @@
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
 import { GoogleAuthProvider } from "firebase/auth";
-import { AuthContext } from "../../context/AuthContext/AuthContext";
-import axios from "axios";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
+import useAuth from "../../hooks/useAuth";
+import useAxios from "../../hooks/useAxios";
 
 const googleProvider = new GoogleAuthProvider();
 
 const Login = () => {
   usePageTitle("Login");
 
-  const { signInWithGoogle, signInWithEmailPass, setUser } = use(AuthContext);
+  const { signInWithGoogle, signInWithEmailPass, setUser } = useAuth();
+  const customAxios = useAxios();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -50,46 +51,21 @@ const Login = () => {
       const user = result.user;
 
       try {
-        const idToken = await user.getIdToken();
-        const existingUser = await axios.get(
-          `http://localhost:3000/user/email/${user.email}`,
-          {
-            headers: {
-              Authorization: `Bearer ${idToken}`,
-            },
-          }
-        );
+        const existingUser = await customAxios.get(`/user/email/${user.email}`);
         if (!existingUser.data) {
-          await axios.post(
-            "http://localhost:3000/user",
-            {
-              name: user.displayName,
-              email: user.email,
-              image: user.photoURL,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${idToken}`,
-              },
-            }
-          );
+          await customAxios.post("/user", {
+            name: user.displayName,
+            email: user.email,
+            image: user.photoURL,
+          });
         }
       } catch (err) {
         if (err.response && err.response.status === 404) {
-          const idToken = await user.getIdToken();
-          await axios.post(
-            "http://localhost:3000/user",
-            {
-              name: user.displayName,
-              email: user.email,
-              image: user.photoURL,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${idToken}`,
-              },
-            }
-          );
+          await customAxios.post("/user", {
+            name: user.displayName,
+            email: user.email,
+            image: user.photoURL,
+          });
         } else {
           throw err;
         }

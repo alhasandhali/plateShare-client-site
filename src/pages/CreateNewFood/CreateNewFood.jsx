@@ -1,17 +1,21 @@
-import React, { use } from "react";
+import React from "react";
 import usePageTitle from "../../utilities/setPageTitle/usePageTitle";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router";
 import CustomLoader from "../../components/CustomLoader/CustomLoader";
+import useAuth from "../../hooks/useAuth";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
+import useAxios from "../../hooks/useAxios";
 
 const CreateNewFood = () => {
   usePageTitle("New Food");
 
-  const { user } = use(AuthContext);
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
+  const customAxios = useAxios();
   const navigate = useNavigate();
 
   const {
@@ -23,16 +27,7 @@ const CreateNewFood = () => {
 
   const addFoodMutation = useMutation({
     mutationFn: async (foodData) => {
-      const idToken = await user.getIdToken();
-      const { data } = await axios.post(
-        "http://localhost:3000/food",
-        foodData,
-        {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
-        }
-      );
+      const { data } = await axiosSecure.post("/food", foodData);
       return data;
     },
     onSuccess: () => {
@@ -52,8 +47,8 @@ const CreateNewFood = () => {
     }
 
     try {
-      const { data: dbUser } = await axios.get(
-        `http://localhost:3000/user/email/${user.email}`
+      const { data: dbUser } = await customAxios.get(
+        `/user/email/${user.email}`
       );
 
       const foodData = {

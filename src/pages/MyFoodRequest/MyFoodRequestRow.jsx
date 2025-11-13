@@ -1,21 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import React, { use } from "react";
 import { Link } from "react-router";
-import { AuthContext } from "../../context/AuthContext/AuthContext";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const MyFoodRequestRow = ({ req }) => {
-  const { user } = use(AuthContext);
+  const axiosSecure = useAxiosSecure();
   const { data: food, isLoading } = useQuery({
     queryKey: ["food", req.food_id],
     enabled: !!req.food_id,
     queryFn: async () => {
-      const idToken = await user.getIdToken();
-      const res = await axios.get(`http://localhost:3000/food/${req.food_id}`, {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
+      const res = await axiosSecure.get(`/food/${req.food_id}`);
       return res.data;
     },
   });
