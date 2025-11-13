@@ -17,7 +17,12 @@ const FoodDetails = () => {
   const { data: food, isLoading: foodLoading } = useQuery({
     queryKey: ["food", id],
     queryFn: async () => {
-      const res = await axios.get(`http://localhost:3000/food/${id}`);
+      const idToken = await user.getIdToken();
+      const res = await axios.get(`http://localhost:3000/food/${id}`, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
       return res.data;
     },
   });
@@ -26,7 +31,15 @@ const FoodDetails = () => {
     queryKey: ["donator", food?.user_id],
     enabled: !!food?.user_id,
     queryFn: async () => {
-      const res = await axios.get(`http://localhost:3000/user/${food.user_id}`);
+      const idToken = await user.getIdToken();
+      const res = await axios.get(
+        `http://localhost:3000/user/${food.user_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      );
       return res.data;
     },
   });
@@ -34,8 +47,14 @@ const FoodDetails = () => {
   const { data: requests = [] } = useQuery({
     queryKey: ["requests", id],
     queryFn: async () => {
+      const idToken = await user.getIdToken();
       const res = await axios.get(
-        `http://localhost:3000/requested-foods?food_id=${id}`
+        `http://localhost:3000/requested-foods?food_id=${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
       );
       return res.data;
     },
@@ -44,8 +63,19 @@ const FoodDetails = () => {
   const { register, handleSubmit, reset } = useForm();
 
   const requestMutation = useMutation({
-    mutationFn: async (requestData) =>
-      axios.post("http://localhost:3000/requested-food", requestData),
+    mutationFn: async (requestData) => {
+      const idToken = await user.getIdToken();
+      const { data } = await axios.post(
+        "http://localhost:3000/requested-food",
+        requestData,
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      );
+      return data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(["requests", id]);
       document.getElementById("foodRequestModal").close();
@@ -56,13 +86,28 @@ const FoodDetails = () => {
 
   const updateRequestStatus = useMutation({
     mutationFn: async ({ requestId, status }) => {
-      await axios.patch(`http://localhost:3000/requested-food/${requestId}`, {
-        status,
-      });
+      const idToken = await user.getIdToken();
+
+      await axios.patch(
+        `http://localhost:3000/requested-food/${requestId}`,
+        { status },
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      );
+
       if (status === "accepted") {
-        await axios.patch(`http://localhost:3000/food/${id}`, {
-          food_status: "donated",
-        });
+        await axios.patch(
+          `http://localhost:3000/food/${id}`,
+          { food_status: "donated" },
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
+        );
       }
     },
     onSuccess: () => {

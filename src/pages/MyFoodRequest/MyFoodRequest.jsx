@@ -19,15 +19,20 @@ const MyFoodRequest = () => {
     queryKey: ["myRequests", user?.email],
     enabled: !!user?.email,
     queryFn: async () => {
+      const idToken = await user.getIdToken();
       const res = await axios.get(
-        `http://localhost:3000/requested-foods?email=${user.email}`
+        `http://localhost:3000/requested-foods?email=${user.email}`,
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
       );
       return res.data;
     },
   });
 
-  if (isLoading)
-    return <p className="text-center py-20">Loading requests...</p>;
+  if (isLoading) return <CustomLoader />;
 
   if (!myRequests.length)
     return (

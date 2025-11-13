@@ -3,17 +3,18 @@ import logo from "../../assets/logo.png";
 import { Link, NavLink } from "react-router";
 import "./Navbar.css";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
+import { toast } from "react-toastify";
 
 const Navbar = () => {
   const { user, logOut, loading } = use(AuthContext);
-  console.log(user);
-
-  user ? console.log("User ache") : console.log("User nai");
 
   const handleLogout = () => {
     logOut()
-      .then(() => console.log("User logged out"))
-      .catch((err) => console.error("Logout error:", err));
+      .then(() => toast.success("Logout successful!"))
+      .catch((err) => {
+        console.error("Logout error:", err);
+        toast.error(err.message || "Failed to logout");
+      });
   };
 
   const navLinkStyle =
@@ -88,7 +89,7 @@ const Navbar = () => {
                         </p>
                       </div>
                     )}
-                    <ul className="p-2">
+                    <ul className="pl-2">
                       <li>
                         <NavLink to="/create-food" className={navLinkStyle}>
                           Add Food
@@ -198,7 +199,7 @@ const Navbar = () => {
                   </NavLink>
                 </li>
                 <li>
-                  <button onClick={handleLogout} className="themeBtn mt-3">
+                  <button onClick={handleLogout} className="themeBtn py-0 mt-3">
                     <span>Logout</span>
                   </button>
                 </li>

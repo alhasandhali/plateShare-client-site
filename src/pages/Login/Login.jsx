@@ -50,23 +50,46 @@ const Login = () => {
       const user = result.user;
 
       try {
+        const idToken = await user.getIdToken();
         const existingUser = await axios.get(
-          `http://localhost:3000/user/email/${user.email}`
+          `http://localhost:3000/user/email/${user.email}`,
+          {
+            headers: {
+              Authorization: `Bearer ${idToken}`,
+            },
+          }
         );
         if (!existingUser.data) {
-          await axios.post("http://localhost:3000/user", {
-            name: user.displayName,
-            email: user.email,
-            image: user.photoURL,
-          });
+          await axios.post(
+            "http://localhost:3000/user",
+            {
+              name: user.displayName,
+              email: user.email,
+              image: user.photoURL,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${idToken}`,
+              },
+            }
+          );
         }
       } catch (err) {
         if (err.response && err.response.status === 404) {
-          await axios.post("http://localhost:3000/user", {
-            name: user.displayName,
-            email: user.email,
-            image: user.photoURL,
-          });
+          const idToken = await user.getIdToken();
+          await axios.post(
+            "http://localhost:3000/user",
+            {
+              name: user.displayName,
+              email: user.email,
+              image: user.photoURL,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${idToken}`,
+              },
+            }
+          );
         } else {
           throw err;
         }
@@ -90,8 +113,6 @@ const Login = () => {
   const handleGoogleLogin = () => {
     googleLoginMutation.mutate();
   };
-
-  console.log("From", from);
 
   return (
     <div className="py-10 bg-linear-to-br from-[#5dae61] via-[#3b7d5e] to-[#183153]">

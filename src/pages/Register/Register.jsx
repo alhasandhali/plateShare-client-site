@@ -10,17 +10,17 @@ import { useMutation } from "@tanstack/react-query";
 
 const googleProvider = new GoogleAuthProvider();
 
+const rex = /^(?=.*[A-Z])(?=.*[a-z]).{6,}$/;
+
 const Register = () => {
   usePageTitle("Registration");
-  const { signInWithGoogle, signUpWithEmailPass, updateUser, setUser } =
+  const { signInWithGoogle, signUpWithEmailPass, updateUser, setUser, user } =
     use(AuthContext);
 
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const togglePassword = () => setShowPassword(!showPassword);
   const navigate = useNavigate();
-
-  const rex = /^(?=.*[A-Z])(?=.*[a-z]).{6,}$/;
 
   const {
     register,
@@ -40,11 +40,20 @@ const Register = () => {
     } else {
       setPasswordError("");
     }
-  }, []);
+  }, [password]);
 
   const saveUserMutation = useMutation({
     mutationFn: async (userData) => {
-      const { data } = await axios.post("http://localhost:3000/user", userData);
+      const idToken = await user.getIdToken();
+      const { data } = await axios.post(
+        "http://localhost:3000/user",
+        userData,
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      );
       return data;
     },
     onSuccess: (data, variables) => {
@@ -95,7 +104,7 @@ const Register = () => {
 
       saveUserMutation.mutate(userData);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error(error.message, {
         position: "top-right",
         autoClose: 3000,

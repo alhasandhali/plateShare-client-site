@@ -33,16 +33,24 @@ const Footer = () => {
           </h6>
           <ul className="space-y-2">
             <li>
-              <a className="hover:text-prime transition">About Us</a>
+              <Link to="/" className="hover:text-prime transition">
+                About Us
+              </Link>
             </li>
             <li>
-              <a className="hover:text-prime transition">Contact</a>
+              <Link to="/" className="hover:text-prime transition">
+                Contact
+              </Link>
             </li>
             <li>
-              <a className="hover:text-prime transition">Careers</a>
+              <Link to="/" className="hover:text-prime transition">
+                Careers
+              </Link>
             </li>
             <li>
-              <a className="hover:text-prime transition">Press Kit</a>
+              <Link to="/" className="hover:text-prime transition">
+                Press Kit
+              </Link>
             </li>
           </ul>
         </div>
@@ -57,7 +65,10 @@ const Footer = () => {
               </Link>
             </li>
             <li>
-              <Link to="/" className="hover:text-prime transition">
+              <Link
+                to="/available-foods"
+                className="hover:text-prime transition"
+              >
                 Browse Food
               </Link>
             </li>

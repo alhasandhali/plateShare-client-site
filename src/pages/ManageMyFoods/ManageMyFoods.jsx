@@ -22,9 +22,15 @@ const ManageMyFoods = () => {
 
   const updateFoodMutation = useMutation({
     mutationFn: async ({ foodId, updatedData }) => {
+      const idToken = await user.getIdToken();
       const { data } = await axios.patch(
         `http://localhost:3000/food/${foodId}`,
-        updatedData
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
       );
       return data;
     },
@@ -71,8 +77,8 @@ const ManageMyFoods = () => {
     toast.error(error.message || "Failed to fetch your foods.");
   }
 
-  const handleDelete = (foodId) => {
-    Swal.fire({
+  const handleDelete = async (foodId) => {
+    const result = await Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
       icon: "warning",
@@ -80,22 +86,28 @@ const ManageMyFoods = () => {
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        try {
-          axios.delete(`http://localhost:3000/food/${foodId}`);
-          toast.success("Food deleted successfully!");
-          window.location.reload();
-        } catch (err) {
-          toast.error(err.message || "Failed to delete food.");
-        }
-        Swal.fire({
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const idToken = await user.getIdToken();
+        await axios.delete(`http://localhost:3000/food/${foodId}`, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        toast.success("Food deleted successfully!");
+        window.location.reload();
+
+        await Swal.fire({
           title: "Deleted!",
           text: "Your file has been deleted.",
           icon: "success",
         });
+      } catch (err) {
+        toast.error(err.message || "Failed to delete food.");
       }
-    });
+    }
   };
 
   return (

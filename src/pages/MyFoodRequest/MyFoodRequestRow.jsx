@@ -1,17 +1,25 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import React from "react";
+import React, { use } from "react";
 import { Link } from "react-router";
+import { AuthContext } from "../../context/AuthContext/AuthContext";
 
 const MyFoodRequestRow = ({ req }) => {
+  const { user } = use(AuthContext);
   const { data: food, isLoading } = useQuery({
     queryKey: ["food", req.food_id],
     enabled: !!req.food_id,
     queryFn: async () => {
-      const res = await axios.get(`http://localhost:3000/food/${req.food_id}`);
+      const idToken = await user.getIdToken();
+      const res = await axios.get(`http://localhost:3000/food/${req.food_id}`, {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
       return res.data;
     },
   });
+
   if (isLoading || !food) {
     return (
       <tr className="animate-pulse border-b border-gray-200">

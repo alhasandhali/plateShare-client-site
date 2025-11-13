@@ -23,7 +23,16 @@ const CreateNewFood = () => {
 
   const addFoodMutation = useMutation({
     mutationFn: async (foodData) => {
-      const { data } = await axios.post("http://localhost:3000/food", foodData);
+      const idToken = await user.getIdToken();
+      const { data } = await axios.post(
+        "http://localhost:3000/food",
+        foodData,
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      );
       return data;
     },
     onSuccess: () => {
