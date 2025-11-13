@@ -5,7 +5,7 @@ import "./Navbar.css";
 import { AuthContext } from "../../context/AuthContext/AuthContext";
 
 const Navbar = () => {
-  const { user, logOut } = use(AuthContext);
+  const { user, logOut, loading } = use(AuthContext);
   console.log(user);
 
   user ? console.log("User ache") : console.log("User nai");
@@ -77,14 +77,14 @@ const Navbar = () => {
                     {user.photoURL && (
                       <div className="cursor-pointer flex items-center gap-2">
                         <img
-                          src={user.photoURL}
-                          alt={user.displayName}
+                          src={user?.photoURL}
+                          alt={user?.displayName}
                           tabIndex={0}
                           role="button"
                           className="w-10 h-10 rounded-full border-2 border-[#5dae61]"
                         />
                         <p className={`${navLinkStyle} font-bold`}>
-                          {user.displayName}
+                          {user?.displayName}
                         </p>
                       </div>
                     )}
@@ -138,12 +138,41 @@ const Navbar = () => {
               )}
             </ul>
           </div>
-          {user ? (
+          {loading ? (
             <div className="hidden lg:flex justify-between items-center gap-3 dropdown dropdown-bottom dropdown-end">
-              {user.photoURL && (
+              <span className="loading loading-spinner loading-md text-prime w-10 h-10 rounded-full border-2 border-[#5dae61] cursor-pointer"></span>
+              <ul
+                tabIndex="-1"
+                className="dropdown-content menu bg-base-100 rounded-box z-100 w-52 p-2 shadow-sm"
+              >
+                <li>
+                  <NavLink to="/create-food" className={navLinkStyle}>
+                    Add Food
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/manage-my-foods" className={navLinkStyle}>
+                    Manage My Foods
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink to="/my-food-requests" className={navLinkStyle}>
+                    My Food Requests
+                  </NavLink>
+                </li>
+                <li>
+                  <button onClick={handleLogout} className="themeBtn mt-3">
+                    <span>Logout</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          ) : user ? (
+            <div className="hidden lg:flex justify-between items-center gap-3 dropdown dropdown-bottom dropdown-end">
+              {user?.photoURL && (
                 <img
-                  src={user.photoURL}
-                  alt={user.displayName}
+                  src={user?.photoURL}
+                  alt={user?.displayName}
                   tabIndex={0}
                   role="button"
                   className="w-10 h-10 rounded-full border-2 border-[#5dae61] cursor-pointer"

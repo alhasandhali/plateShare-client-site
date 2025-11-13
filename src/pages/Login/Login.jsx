@@ -91,6 +91,8 @@ const Login = () => {
     googleLoginMutation.mutate();
   };
 
+  console.log("From", from);
+
   return (
     <div className="py-10 bg-linear-to-br from-[#5dae61] via-[#3b7d5e] to-[#183153]">
       <div className="flex items-center justify-center w-11/12 m-auto">
