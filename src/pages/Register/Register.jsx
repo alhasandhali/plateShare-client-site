@@ -14,8 +14,7 @@ const rex = /^(?=.*[A-Z])(?=.*[a-z]).{6,}$/;
 
 const Register = () => {
   usePageTitle("Registration");
-  const { signInWithGoogle, signUpWithEmailPass, updateUser, setUser } =
-    useAuth();
+  const { signInWithGoogle, signUpWithEmailPass, updateUser } = useAuth();
   const customAxios = useAxios();
   const [passwordError, setPasswordError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -44,22 +43,14 @@ const Register = () => {
 
   const saveUserMutation = useMutation({
     mutationFn: async (userData) => {
-      console.log("Ami data pathanor age");
       const { data } = await customAxios.post("/user", userData);
-      console.log("Ami data: ", data);
       return data;
     },
-    onSuccess: (data, variables) => {
-      setUser({
-        displayName: variables.name,
-        email: variables.email,
-        photoURL: variables.image,
-      });
+    onSuccess: () => {
       toast.success("Registration successful!");
       navigate("/");
     },
     onError: (error) => {
-      console.log("ami akhan theke bolci 1");
       toast.error(error.message || "Failed to register user");
     },
   });
@@ -81,7 +72,6 @@ const Register = () => {
       saveUserMutation.mutate(userData);
       reset();
     } catch (error) {
-      console.log("ami akhan theke bolci 2");
       toast.error(error.message);
     }
   };
