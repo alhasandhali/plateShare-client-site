@@ -325,9 +325,14 @@ nodemon index.js
   https://plateshare-api-server-two.vercel.app/
   ```
 - **GitHub Repository:**
-  ```bash
-  https://github.com/alhasandhali/gamora.git
-  ```
+  - Client-side
+    ```bash
+    https://github.com/alhasandhali/plateShare-client-site.git
+    ```
+  - Server-side
+    ```bash
+    https://github.com/alhasandhali/plateShare-server-site.git
+    ```
 
 ---
 
