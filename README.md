@@ -1,6 +1,9 @@
+<img align="center" width="100%" src="/plateShare-home.png" alt="home-page">
+
+
 # **PlateShare — A Community Food Donation Platform**
 
-### **Live Site:** [https://plateshare-ahd.netlify.app/](https://plateshare-ahd.netlify.app/)
+### **Live Site:** [PlateShare](https://plateshare-ahd.netlify.app/)
 
 _Share a meal, Change a life._
 
@@ -106,6 +109,57 @@ and social media icons (Facebook, Instagram, X).
 
 ---
 
+## Data Structure
+
+All data is stored in MongoDB:
+
+- **User:**
+```json
+{
+  "_id":"example",
+  "name":"Example",
+  "email":"example@gmail.com",
+  "image":"https://i.ibb.co.com/pvWPkg07/example.png"
+}
+```
+- **Food:**
+```json
+{
+  "_id":"example",
+  "food_name":"Example",
+  "food_image":"https://i.ibb.co.com/example.jpg",
+  "food_quantity":{
+    "$numberInt":"6"
+  },
+  "pickup_location":"91 Elm Rd, Austin, TX",
+  "expire_date":"2025-11-12",
+  "additional_notes":"Crispy, served warm.",
+  "user_id":"example",
+  "food_status":"Available"
+}
+```
+- **Food Requests:**
+```json
+{
+  "_id":"example",
+  "location":"45 Pine Rd, Seattle, WA",
+  "why_need_food":"For community event serving homeless individuals.",
+  "contact_no":"+1-206-555-0199",
+  "user_email":"example@gmail.com",
+  "user_name":"Example",
+  "user_image":"https://i.ibb.co/example.jpg",
+  "food_id":"example",
+  "status":"pending"
+}
+```
+---
+## Animations
+
+- **Framer Motion**
+- **React Spring**
+
+---
+
 ## **Tech Stack**
 
 | Category       | Technologies Used                     |
@@ -118,6 +172,126 @@ and social media icons (Facebook, Instagram, X).
 | Form Handling  | react-hook-form                       |
 | Data Fetching  | TanStack Query                        |
 | Hosting        | Netlify & Vercel(Backend)             |
+
+---
+
+## Dependencies
+- **Client-side**
+```json
+"dependencies": {
+    "@tailwindcss/vite": "^4.1.17",
+    "@tanstack/react-query": "^5.90.7",
+    "axios": "^1.13.2",
+    "firebase": "^12.5.0",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.553.0",
+    "react": "^19.1.1",
+    "react-countup": "^6.5.3",
+    "react-dom": "^19.1.1",
+    "react-hook-form": "^7.66.0",
+    "react-router": "^7.9.5",
+    "react-toastify": "^11.0.5",
+    "react-type-animation": "^3.2.0",
+    "sweetalert2": "^11.26.3",
+    "tailwindcss": "^4.1.17"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.4",
+    "daisyui": "^5.4.7",
+    "eslint": "^9.36.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.22",
+    "globals": "^16.4.0",
+    "vite": "^7.1.7"
+  }
+```
+- **Server-side**
+```json
+"dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.6.0",
+    "mongodb": "^7.0.0"
+  }
+```
+---
+
+
+## Installation & Local Setup
+### For Client-side
+1. **Clone the repository:**
+```bash
+git clone https://github.com/alhasandhali/plateShare-client-site.git
+cd plateShate-client
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Create `.env.local` with Firebase config**
+4. **Build for production**
+```bash
+npm run build
+```
+---
+
+**Firebase Environment Variables (`.env.local`)**
+```bash
+REACT_APP_FIREBASE_API_KEY=your_api_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=xxxx
+REACT_APP_FIREBASE_APP_ID=1:xxxx:web:yyyy
+```
+
+### For Server-side
+1. **Clone the repository:**
+```bash
+git clone https://github.com/alhasandhali/plateShare-server-site.git
+cd plateShate-server
+```
+
+2. **Install dependencies**
+```bash
+npm install
+```
+
+3. **Create `.env.local`**
+```bash
+FIREBASE_SERVICE_KEY=your_base64_encoded_firebase_admin_key
+DB_USER=your_mongodb_username
+DB_PASS=your_mongodb_password
+PORT=3000
+```
+
+  - **Note: To encode your Firebase admin key, you can use `encode.js`:**
+  ```bash
+  const fs = require("fs");
+  const key = fs.readFileSync("./plateshare-firebase-admin-key.json", "utf8");
+  const base64 = Buffer.from(key).toString("base64");
+  console.log(base64);
+  ```
+
+4. **Project Structure**
+```bash
+node_modules/
+.env
+plateshare-firebase-admin-key.json
+.vercel
+index.js
+```
+
+5. **Run the Server**
+```bash
+nodemon index.js
+```
 
 ---
 
@@ -140,12 +314,20 @@ and social media icons (Facebook, Instagram, X).
 
 ---
 
-## **Author**
+## Live Link & Repository
 
-**Developed by:** Al Hasan Dhali
-
-- **Email:** alhasandhali@gmail.com
-- **GitHub:** [https://github.com/alhasandhali](https://github.com/alhasandhali)
+- **Live Website:** [PlateShare Live Demo](https://plateshare-ahd.netlify.app/)
+  ```bash
+  https://plateshare-ahd.netlify.app/
+  ```
+- **Live Server:** [PlateShare Server Live Demo](https://plateshare-api-server-two.vercel.app/)
+  ```bash
+  https://plateshare-api-server-two.vercel.app/
+  ```
+- **GitHub Repository:**
+  ```bash
+  https://github.com/alhasandhali/gamora.git
+  ```
 
 ---
 
